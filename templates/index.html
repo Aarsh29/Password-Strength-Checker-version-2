@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHIELD // Password Security Auditor</title>
+    <!-- Google Fonts for Modern Cybersecurity Aesthetics -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Orbitron:wght@400;600;800;900&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Cyber Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    
+    <div class="app-container">
+        <!-- Main Header -->
+        <header class="main-header">
+            <div class="logo">
+                <i class="fa-solid fa-shield-halved neon-blue-text"></i>
+                <h1>SHIELD<span class="neon-green-text">//</span>AUDITOR</h1>
+            </div>
+            <p class="subtitle font-fira">SECURE PASSWORD AUDITING SYSTEM [v2.0.0]</p>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <main class="dashboard-grid">
+            <!-- Left Side: Password Input and Visual Meter -->
+            <section class="panel main-input-panel">
+                <div class="panel-header">
+                    <span class="terminal-dot"></span>
+                    <h2>PASSWORD INPUT</h2>
+                    <span class="status-indicator online">SYS_ON</span>
+                </div>
+                
+                <div class="panel-body">
+                    <!-- Password Field & Controls -->
+                    <div class="input-wrapper">
+                        <input type="password" id="passwordInput" placeholder="Enter password to audit..." autocomplete="off" spellcheck="false">
+                        <button type="button" id="toggleVisibility" title="Toggle Show/Hide Password">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div class="action-buttons">
+                        <button id="generateBtn" class="cyber-btn btn-blue">
+                            <i class="fa-solid fa-dice"></i> Generate Strong
+                        </button>
+                        <button id="copyBtn" class="cyber-btn btn-green" disabled>
+                            <i class="fa-solid fa-copy"></i> Copy Password
+                        </button>
+                        <button id="saveBtn" class="cyber-btn btn-outline" disabled>
+                            <i class="fa-solid fa-server"></i> Commit Hash
+                        </button>
+                    </div>
+
+                    <!-- Live Strength Meter -->
+                    <div class="meter-container">
+                        <div class="meter-labels">
+                            <span id="strengthLabel" class="strength-lbl text-weak">WEAK</span>
+                            <span id="scorePercentage" class="score-pct">0%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div id="strengthProgress" class="progress-bar bar-weak" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="hashDisplayContainer" class="hash-display font-fira">
+                        <span class="hash-label">SHA-256 HASH (UI DISPLAY ONLY):</span>
+                        <span id="hashDisplayValue" class="hash-value">----------------------------------------------------------------</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side - Security Report Panel -->
+            <section class="panel report-panel">
+                <div class="panel-header">
+                    <span class="terminal-dot"></span>
+                    <h2>SECURITY AUDIT REPORT</h2>
+                    <span id="overallRatingBadge" class="rating-badge badge-weak">WEAK</span>
+                </div>
+                
+                <div class="panel-body">
+                    <!-- Dashboard Cards Grid -->
+                    <div class="cards-grid">
+                        
+                        <!-- Entropy Card -->
+                        <div class="card entropy-card">
+                            <div class="card-title">
+                                <i class="fa-solid fa-gauge-high neon-blue-text"></i>
+                                <span>Entropy Score</span>
+                            </div>
+                            <div class="entropy-value font-orbitron" id="entropyValue">0.0 <span class="bits">bits</span></div>
+                            <p class="card-desc" id="entropyDesc">No password analyzed yet.</p>
+                        </div>
+                        
+                        <!-- Breach & Reuse Card -->
+                        <div class="card breach-card">
+                            <div class="card-title">
+                                <i class="fa-solid fa-circle-radiation neon-red-text"></i>
+                                <span>Vulnerability Status</span>
+                            </div>
+                            <div class="vuln-status-list">
+                                <div class="vuln-item">
+                                    <span>Breach Simulator (HIBP):</span>
+                                    <span id="breachStatus" class="status-clean">CLEAN</span>
+                                </div>
+                                <div class="vuln-item">
+                                    <span>Vault History Reuse:</span>
+                                    <span id="reuseStatus" class="status-clean">NOT USED</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detected Pattern Weaknesses -->
+                    <div id="patternWeaknessBlock" class="pattern-weakness-container" style="display: none;">
+                        <h3>PATTERN WEAKNESSES DETECTED</h3>
+                        <div id="patternWeaknessList" class="pattern-weakness-list font-fira">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Complexity Checklist & Crack Estimates -->
+                    <div class="report-details-grid">
+                        
+                        <!-- Checklist -->
+                        <div class="detail-block">
+                            <h3>COMPLEXITY CHECKLIST</h3>
+                            <ul class="checklist font-fira" id="checklist">
+                                <li id="chkLength" class="chk-fail"><i class="fa-solid fa-xmark"></i> Minimum Length (12+ recommended)</li>
+                                <li id="chkLower" class="chk-fail"><i class="fa-solid fa-xmark"></i> Lowercase Letters (a-z)</li>
+                                <li id="chkUpper" class="chk-fail"><i class="fa-solid fa-xmark"></i> Uppercase Letters (A-Z)</li>
+                                <li id="chkDigit" class="chk-fail"><i class="fa-solid fa-xmark"></i> Numbers (0-9)</li>
+                                <li id="chkSpecial" class="chk-fail"><i class="fa-solid fa-xmark"></i> Special Characters (@, #, $, etc.)</li>
+                                <li id="chkSeq" class="chk-pass"><i class="fa-solid fa-check"></i> Free of Sequential Patterns</li>
+                                <li id="chkRep" class="chk-pass"><i class="fa-solid fa-check"></i> Free of Repeated Characters</li>
+                            </ul>
+                        </div>
+
+                        <!-- Crack Estimation Table -->
+                        <div class="detail-block">
+                            <h3>ESTIMATED CRACK TIMES</h3>
+                            <table class="crack-table">
+                                <thead>
+                                    <tr>
+                                        <th>Attack Vector</th>
+                                        <th>Speed / Method</th>
+                                        <th>Time to Crack</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Online Throttled</td>
+                                        <td class="font-fira">10 req/s</td>
+                                        <td id="crackOnlineThrottled" class="font-orbitron text-weak">Instant</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Online Unthrottled</td>
+                                        <td class="font-fira">1k req/s</td>
+                                        <td id="crackOnlineUnthrottled" class="font-orbitron text-weak">Instant</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Offline Fast CPU</td>
+                                        <td class="font-fira">10M hash/s</td>
+                                        <td id="crackOfflineCPU" class="font-orbitron text-weak">Instant</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Offline GPU Cluster</td>
+                                        <td class="font-fira">10B hash/s</td>
+                                        <td id="crackOfflineGPU" class="font-orbitron text-weak">Instant</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Suggestions Generator -->
+                    <div class="suggestions-container">
+                        <h3>REMEDIATION SUGGESTIONS</h3>
+                        <div id="suggestionsList" class="suggestions-list">
+                            <p class="no-suggestions">Enter a password to generate security remediation steps.</p>
+                        </div>
+                        
+                        <div id="alternativeBox" class="alternative-box" style="display: none;">
+                            <div class="alt-label">SUGGESTED STRONG ALTERNATIVE:</div>
+                            <div class="alt-content">
+                                <span id="alternativeValue" class="font-fira"></span>
+                                <button id="useAlternativeBtn" class="alt-copy-btn" title="Use This Password">
+                                    <i class="fa-solid fa-check"></i> Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Toast Notification system -->
+        <div id="toast" class="toast">
+            <i class="fa-solid fa-circle-check toast-icon"></i>
+            <span id="toastMsg" class="toast-message">Copied to Clipboard!</span>
+        </div>
+
+        <footer class="main-footer font-fira">
+            <p>&copy; 2026 SHIELD SECURITY LABS. Secure O(1) SHA-256 peppered fingerprint lookup + slow salted bcrypt vault storage. Have I Been Pwned check operates via k-anonymity (prefix matching only).</p>
+        </footer>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
