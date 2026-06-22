@@ -18,8 +18,8 @@ To clone and run this project locally, follow these steps:
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repository-url>
-cd <repository-folder>
+git clone https://github.com/Aarsh29/Password-Strength-Checker-version-2.git
+cd Password-Strength-Checker-version-2
 ```
 
 ### 2. Initialize a Virtual Environment
